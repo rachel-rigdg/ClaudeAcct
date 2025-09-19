@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1 class="h2">Transaction Detail</h1>
+    <a href="/transactions" class="btn btn-outline-secondary">Back to Transactions</a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ transaction[0] }}</h5>
+                
+                <dl class="row">
+                    <dt class="col-sm-3">Date:</dt>
+                    <dd class="col-sm-9">{{ transaction[1] }}</dd>
+                    
+                    <dt class="col-sm-3">Description:</dt>
+                    <dd class="col-sm-9">{{ transaction[2] }}</dd>
+                    
+                    <dt class="col-sm-3">Reference:</dt>
+                    <dd class="col-sm-9">{{ transaction[3] or 'None' }}</dd>
+                    
+                    <dt class="col-sm-3">Created:</dt>
+                    <dd class="col-sm-9">{{ transaction[4] }}</dd>
+                </dl>
+                
+                <h6>Transaction Entries</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Account</th>
+                                <th>Description</th>
+                                <th class="text-end">Debit</th>
+                                <th class="text-end">Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total_debits = 0 %}
+                            {% set total_credits = 0 %}
+                            {% for entry in entries %}
+                                {% set total_debits = total_debits + entry[3] %}
+                                {% set total_credits = total_credits + entry[4] %}
+                                <tr>
+                                    <td>{{ entry[1] }} - {{ entry[2] }}</td>
+                                    <td>{{ entry[5] or transaction[2] }}</td>
+                                    <td class="text-end">{{ entry[3] | currency if entry[3] > 0 else '' }}</td>
+                                    <td class="text-end">{{ entry[4] | currency if entry[4] > 0 else '' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-dark fw-bold">
+                                <td colspan="2">Totals</td>
+                                <td class="text-end">{{ total_debits | currency }}</td>
+                                <td class="text-end">{{ total_credits | currency }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                {% if (total_debits - total_credits) | abs < 0.01 %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> Transaction is balanced.
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Transaction is NOT balanced!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

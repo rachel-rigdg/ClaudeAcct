@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Create New Transaction</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <form method="POST" id="transactionForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="transaction_id" class="form-label">Transaction ID</label>
+                        <input type="text" class="form-control" id="transaction_id" name="transaction_id" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="reference" class="form-label">Reference</label>
+                <input type="text" class="form-control" id="reference" name="reference">
+            </div>
+            
+            <h5>Transaction Entries</h5>
+            <div class="alert alert-info">
+                <strong>Instructions:</strong> Add at least 2 entries. Total debits must equal total credits.
+            </div>
+            
+            <input type="hidden" id="entry_count" name="entry_count" value="2">
+            
+            <div class="row mb-2">
+                <div class="col-md-4"><strong>Account</strong></div>
+                <div class="col-md-2"><strong>Debit</strong></div>
+                <div class="col-md-2"><strong>Credit</strong></div>
+                <div class="col-md-4"><strong>Description</strong></div>
+            </div>
+            
+            <!-- Entry 1 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <select class="form-select" name="entries[0][account_id]" required>
+                        <option value="">Select Account...</option>
+                        {% for account in accounts %}
+                            <option value="{{ account[0] }}">{{ account[0] }} - {{ account[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="entries[0][debit]" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="entries[0][credit]" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="entries[0][description]" placeholder="Entry description">
+                </div>
+            </div>
+            
+            <!-- Entry 2 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <select class="form-select" name="entries[1][account_id]" required>
+                        <option value="">Select Account...</option>
+                        {% for account in accounts %}
+                            <option value="{{ account[0] }}">{{ account[0] }} - {{ account[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="entries[1][debit]" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="entries[1][credit]" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="entries[1][description]" placeholder="Entry description">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Transaction</button>
+            <a href="/transactions" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

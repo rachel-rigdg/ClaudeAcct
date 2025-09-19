@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Edit Transaction</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <form method="POST" id="transactionForm">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="transaction_id" class="form-label">Transaction ID</label>
+                        <input type="text" class="form-control" id="transaction_id" name="transaction_id" 
+                               value="{{ transaction.id }}" readonly>
+                        <div class="form-text">Transaction ID cannot be changed</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" 
+                               value="{{ transaction.date }}" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="reference" class="form-label">Reference</label>
+                        <input type="text" class="form-control" id="reference" name="reference" 
+                               value="{{ transaction.reference or '' }}">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="description" name="description" 
+                       value="{{ transaction.description }}" required>
+            </div>
+            
+            <h5>Transaction Entries</h5>
+            <div class="alert alert-info">
+                <strong>Balance Check:</strong>
+                <span id="balanceStatus">Checking balance...</span>
+            </div>
+            
+            <div id="entries">
+                {% for entry in entries %}
+                <div class="row mb-3 transaction-entry">
+                    <div class="col-md-4">
+                        <label class="form-label">Account</label>
+                        <select class="form-select" name="entries[{{ loop.index0 }}][account_id]" required>
+                            {% for account in accounts %}
+                                <option value="{{ account[0] }}" {% if entry[1] == account[0] %}selected{% endif %}>
+                                    {{ account[0] }} - {{ account[1] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Debit</label>
+                        <input type="number" class="form-control debit-input" 
+                               name="entries[{{ loop.index0 }}][debit]" 
+                               value="{{ entry[3] if entry[3] > 0 else '' }}"
+                               placeholder="0.00" step="0.01" min="0" onchange="updateBalance()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Credit</label>
+                        <input type="number" class="form-control credit-input" 
+                               name="entries[{{ loop.index0 }}][credit]" 
+                               value="{{ entry[4] if entry[4] > 0 else '' }}"
+                               placeholder="0.00" step="0.01" min="0" onchange="updateBalance()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-control" 
+                               name="entries[{{ loop.index0 }}][description]" 
+                               value="{{ entry[5] or '' }}"
+                               placeholder="Entry description">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger btn-sm d-block" onclick="removeEntry(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-3">
+                <button type="button" class="btn btn-secondary" onclick="addEntry()">
+                    <i class="fas fa-plus"></i> Add Entry
+                </button>
+            </div>
+            
+            <input type="hidden" id="entry_count" name="entry_count" value="{{ entries|length }}">
+            
+            <button type="submit" class="btn btn-primary" id="submitBtn">Update Transaction</button>
+            <a href="/transactions" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let entryCount = {{ entries|length }};
+const accounts = {{ accounts | tojson }};
+
+function addEntry() {
+    const entriesDiv = document.getElementById('entries');
+    
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'row mb-3 transaction-entry';
+    entryDiv.innerHTML = `
+        <div class="col-md-4">
+            <label class="form-label">Account</label>
+            <select class="form-select" name="entries[${entryCount}][account_id]" required>
+                <option value="">Select Account...</option>
+                ${accounts.map(acc => `<option value="${acc[0]}">${acc[0]} - ${acc[1]}</option>`).join('')}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Debit</label>
+            <input type="number" class="form-control debit-input" name="entries[${entryCount}][debit]" 
+                   placeholder="0.00" step="0.01" min="0" onchange="updateBalance()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Credit</label>
+            <input type="number" class="form-control credit-input" name="entries[${entryCount}][credit]" 
+                   placeholder="0.00" step="0.01" min="0" onchange="updateBalance()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-control" name="entries[${entryCount}][description]" 
+                   placeholder="Entry description">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-danger btn-sm d-block" onclick="removeEntry(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    
+    entriesDiv.appendChild(entryDiv);
+    entryCount++;
+    document.getElementById('entry_count').value = entryCount;
+    updateBalance();
+}
+
+function removeEntry(button) {
+    if (document.querySelectorAll('.transaction-entry').length > 2) {
+        button.closest('.transaction-entry').remove();
+        updateBalance();
+    } else {
+        alert('Transaction must have at least 2 entries');
+    }
+}
+
+function updateBalance() {
+    let totalDebits = 0;
+    let totalCredits = 0;
+    
+    document.querySelectorAll('.debit-input').forEach(input => {
+        totalDebits += parseFloat(input.value) || 0;
+    });
+    
+    document.querySelectorAll('.credit-input').forEach(input => {
+        totalCredits += parseFloat(input.value) || 0;
+    });
+    
+    const statusSpan = document.getElementById('balanceStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    statusSpan.textContent = `Total Debits: $${totalDebits.toFixed(2)}, Total Credits: $${totalCredits.toFixed(2)}`;
+    
+    if (Math.abs(totalDebits - totalCredits) < 0.01 && totalDebits > 0) {
+        statusSpan.className = 'text-success';
+        submitBtn.disabled = false;
+    } else {
+        statusSpan.className = 'text-danger';
+        submitBtn.disabled = true;
+    }
+}
+
+// Initial balance check
+updateBalance();
+</script>
+{% endblock %}

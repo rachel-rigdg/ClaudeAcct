@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1 class="h2">Income Statement</h1>
+    <a href="/reports" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+{% if income_statement %}
+    <h5>{{ income_statement.period }}</h5>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Revenue Section -->
+                    <h6 class="card-title text-success">REVENUE</h6>
+                    <table class="table table-sm">
+                        {% for account_id, name, amount in income_statement.revenues %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-end">{{ amount | currency }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-success fw-bold">
+                            <td>Total Revenue</td>
+                            <td class="text-end">{{ income_statement.total_revenue | currency }}</td>
+                        </tr>
+                    </table>
+                    
+                    <!-- Expenses Section -->
+                    <h6 class="card-title text-danger mt-4">EXPENSES</h6>
+                    <table class="table table-sm">
+                        {% for account_id, name, amount in income_statement.expenses %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-end">{{ amount | currency }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-danger fw-bold">
+                            <td>Total Expenses</td>
+                            <td class="text-end">{{ income_statement.total_expenses | currency }}</td>
+                        </tr>
+                    </table>
+                    
+                    <!-- Net Income -->
+                    <table class="table table-sm mt-4">
+                        <tr class="table-primary fw-bold fs-5">
+                            <td>NET INCOME</td>
+                            <td class="text-end">{{ income_statement.net_income | currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Summary</h6>
+                    <dl class="row">
+                        <dt class="col-sm-8">Revenue:</dt>
+                        <dd class="col-sm-4 text-success">{{ income_statement.total_revenue | currency }}</dd>
+                        
+                        <dt class="col-sm-8">Expenses:</dt>
+                        <dd class="col-sm-4 text-danger">{{ income_statement.total_expenses | currency }}</dd>
+                        
+                        <dt class="col-sm-8 border-top pt-2">Net Income:</dt>
+                        <dd class="col-sm-4 border-top pt-2 fw-bold 
+                            {% if income_statement.net_income >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ income_statement.net_income | currency }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <form method="GET" class="row g-3">
+        <div class="col-md-4">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" required>
+        </div>
+        <div class="col-md-4">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        </div>
+    </form>
+{% endif %}
+{% endblock %}

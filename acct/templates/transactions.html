@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Transactions</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/cash-flow" class="btn btn-sm btn-outline-info me-2">
+            <i class="fas fa-chart-line"></i> Cash Flow Summary
+        </a>
+        <a href="/transactions/new" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-plus"></i> New Transaction
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> 
+    <strong>Multi-Bank View:</strong> Shows running balances for all your bank accounts affected by each transaction.
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Ref</th>
+                <th>Entries</th>
+                {% for bank_id, bank_name in bank_accounts.items() %}
+                <th class="text-end">{{ bank_name[:15] }}...</th>
+                {% endfor %}
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for txn_data in transactions_data %}
+            <tr>
+                <td>
+                    <a href="/transactions/{{ txn_data.transaction.id }}">
+                        {{ txn_data.transaction.id }}
+                    </a>
+                </td>
+                <td>{{ txn_data.transaction.date }}</td>
+                <td>{{ txn_data.transaction.description[:30] }}{% if txn_data.transaction.description|length > 30 %}...{% endif %}</td>
+                <td>{{ txn_data.transaction.reference[:10] if txn_data.transaction.reference else '-' }}</td>
+                <td><span class="badge bg-secondary">{{ txn_data.transaction.entry_count }}</span></td>
+                
+                {% for bank_id, bank_name in bank_accounts.items() %}
+                <td class="text-end">
+                    {% if txn_data.bank_effects[bank_id] != 0 %}
+                        <div>
+                            {% if txn_data.bank_effects[bank_id] > 0 %}
+                                <small class="text-success">+{{ txn_data.bank_effects[bank_id] | currency }}</small>
+                            {% else %}
+                                <small class="text-danger">{{ txn_data.bank_effects[bank_id] | currency }}</small>
+                            {% endif %}
+                        </div>
+                        <div><strong>{{ txn_data.balances_after[bank_id] | currency }}</strong></div>
+                    {% else %}
+                        <div class="text-muted">-</div>
+                        <div class="text-muted">{{ txn_data.balances_after[bank_id] | currency }}</div>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="/transactions/{{ txn_data.transaction.id }}/edit" class="btn btn-outline-primary btn-sm" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteTransaction('{{ txn_data.transaction.id }}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Legend -->
+<div class="mt-3">
+    <small class="text-muted">
+        <strong>Legend:</strong> 
+        <span class="text-success">Green = Money In</span> | 
+        <span class="text-danger">Red = Money Out</span> | 
+        <strong>Bold = Balance After Transaction</strong>
+    </small>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Transaction pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page - 1 }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+        
+        {% if has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page + 1 }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this transaction? This will affect all account balances.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let transactionToDelete = null;
+
+function deleteTransaction(transactionId) {
+    transactionToDelete = transactionId;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+document.getElementById('confirmDelete').addEventListener('click', function() {
+    if (transactionToDelete) {
+        window.location.href = `/transactions/${transactionToDelete}/delete`;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Financial Reports</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-balance-scale"></i> Trial Balance
+                </h5>
+                <p class="card-text">View all account balances to ensure books are balanced.</p>
+                <form method="GET" action="/reports/trial-balance">
+                    <div class="mb-3">
+                        <label for="as_of_date" class="form-label">As of Date</label>
+                        <input type="date" class="form-control" id="as_of_date" name="as_of_date">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line"></i> Income Statement
+                </h5>
+                <p class="card-text">Profit and loss statement for a specific period.</p>
+                <form method="GET" action="/reports/income-statement">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-file-alt"></i> Balance Sheet
+                </h5>
+                <p class="card-text">Financial position at a specific point in time.</p>
+                <form method="GET" action="/reports/balance-sheet">
+                    <div class="mb-3">
+                        <label for="as_of_date_bs" class="form-label">As of Date</label>
+                        <input type="date" class="form-control" id="as_of_date_bs" name="as_of_date">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

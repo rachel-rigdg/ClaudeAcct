@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ account.name }} Transactions</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/accounts" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Accounts
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6>Account Details</h6>
+                <dl class="row">
+                    <dt class="col-sm-4">Account ID:</dt>
+                    <dd class="col-sm-8">{{ account.id }}</dd>
+                    
+                    <dt class="col-sm-4">Type:</dt>
+                    <dd class="col-sm-8"><span class="badge bg-secondary">{{ account.account_type }}</span></dd>
+                    
+                    <dt class="col-sm-4">Current Balance:</dt>
+                    <dd class="col-sm-8">
+                        <strong class="{% if current_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ current_balance | currency }}
+                        </strong>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Transaction</th>
+                <th>Description</th>
+                <th class="text-end">Debit</th>
+                <th class="text-end">Credit</th>
+                <th class="text-end">Effect</th>
+                <th class="text-end">Running Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for txn in transactions %}
+            <tr>
+                <td>{{ txn.date }}</td>
+                <td>
+                    <a href="/transactions/{{ txn.id }}">{{ txn.id }}</a>
+                </td>
+                <td>
+                    {{ txn.description }}
+                    {% if txn.entry_description and txn.entry_description != txn.description %}
+                        <br><small class="text-muted">{{ txn.entry_description }}</small>
+                    {% endif %}
+                </td>
+                <td class="text-end">{{ txn.debit | currency if txn.debit > 0 else '' }}</td>
+                <td class="text-end">{{ txn.credit | currency if txn.credit > 0 else '' }}</td>
+                <td class="text-end">
+                    {% if txn.effect > 0 %}
+                        <span class="text-success">+{{ txn.effect | currency }}</span>
+                    {% elif txn.effect < 0 %}
+                        <span class="text-danger">{{ txn.effect | currency }}</span>
+                    {% else %}
+                        <span class="text-muted">{{ txn.effect | currency }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <strong class="{% if txn.running_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ txn.running_balance | currency }}
+                    </strong>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Cash Flow Summary</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/transactions" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Transactions
+        </a>
+    </div>
+</div>
+
+<!-- Current Bank Account Balances -->
+<div class="row mb-4">
+    {% for acc_id, acc_data in account_balances.items() %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <a href="/accounts/{{ acc_id }}/transactions" class="text-decoration-none">
+                        {{ acc_data.name }}
+                    </a>
+                </h6>
+                <h4 class="card-text {% if acc_data.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ acc_data.balance | currency }}
+                </h4>
+                <small class="text-muted">Account {{ acc_id }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <div class="col-md-4 mb-3">
+        <div class="card border-primary">
+            <div class="card-body">
+                <h6 class="card-title">Total Cash</h6>
+                <h4 class="card-text {% if total_cash >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ total_cash | currency }}
+                </h4>
+                <small class="text-muted">All Bank Accounts</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Cash-Affecting Transactions -->
+<h5>Recent Cash Transactions</h5>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                {% for bank_id, bank_name in bank_names.items() %}
+                <th class="text-end">{{ bank_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for txn_data in recent_transactions %}
+            <tr>
+                <td>
+                    <a href="/transactions/{{ txn_data.transaction.id }}">
+                        {{ txn_data.transaction.date }}
+                    </a>
+                </td>
+                <td>{{ txn_data.transaction.description }}</td>
+                {% for bank_id in bank_names.keys() %}
+                <td class="text-end">
+                    {% if txn_data.bank_effects[bank_id] != 0 %}
+                        {% if txn_data.bank_effects[bank_id] > 0 %}
+                            <span class="text-success">+{{ txn_data.bank_effects[bank_id] | currency }}</span>
+                        {% else %}
+                            <span class="text-danger">{{ txn_data.bank_effects[bank_id] | currency }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

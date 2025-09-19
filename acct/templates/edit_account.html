@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Edit Account</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="account_id" class="form-label">Account ID</label>
+                <input type="text" class="form-control" id="account_id" name="account_id" value="{{ account.id }}" readonly>
+                <div class="form-text">Account ID cannot be changed</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Account Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ account.name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="account_type" class="form-label">Account Type</label>
+                <select class="form-select" id="account_type" name="account_type" required>
+                    {% for type in account_types %}
+                        <option value="{{ type }}" {% if account.account_type == type %}selected{% endif %}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="parent_id" class="form-label">Parent Account (Optional)</label>
+                <select class="form-select" id="parent_id" name="parent_id">
+                    <option value="">None</option>
+                    {% for parent in parent_accounts %}
+                        {% if parent[0] != account.id %}
+                            <option value="{{ parent[0] }}" {% if account.parent_id == parent[0] %}selected{% endif %}>
+                                {{ parent[0] }} - {{ parent[1] }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ account.description or '' }}</textarea>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if account.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Active</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Update Account</button>
+            <a href="/accounts" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6>Account Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Current Balance:</dt>
+                    <dd class="col-sm-8">{{ current_balance | currency }}</dd>
+                    
+                    <dt class="col-sm-4">Created:</dt>
+                    <dd class="col-sm-8">{{ account.created_date }}</dd>
+                    
+                    <dt class="col-sm-4">Transactions:</dt>
+                    <dd class="col-sm-8">{{ transaction_count }}</dd>
+                </dl>
+                
+                {% if transaction_count > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        This account has {{ transaction_count }} transactions. 
+                        Changing the account type may affect your reports.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

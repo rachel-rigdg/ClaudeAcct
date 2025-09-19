@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1 class="h2">Balance Sheet</h1>
+    <a href="/reports" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+{% if balance_sheet %}
+    <h5>As of {{ as_of_date }}</h5>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Assets -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">ASSETS</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        {% for account_id, name, balance in balance_sheet.asset.accounts %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-end">{{ balance | currency }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-primary fw-bold">
+                            <td>Total Assets</td>
+                            <td class="text-end">{{ balance_sheet.asset.total | currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <!-- Liabilities -->
+            <div class="card mb-3">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">LIABILITIES</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        {% for account_id, name, balance in balance_sheet.liability.accounts %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-end">{{ balance | currency }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-danger fw-bold">
+                            <td>Total Liabilities</td>
+                            <td class="text-end">{{ balance_sheet.liability.total | currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Equity -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">EQUITY</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        {% for account_id, name, balance in balance_sheet.equity.accounts %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td class="text-end">{{ balance | currency }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-success fw-bold">
+                            <td>Total Equity</td>
+                            <td class="text-end">{{ balance_sheet.equity.total | currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <form method="GET" class="row g-3">
+        <div class="col-md-6">
+            <label for="as_of_date" class="form-label">As of Date</label>
+            <input type="date" class="form-control" id="as_of_date" name="as_of_date" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        </div>
+    </form>
+{% endif %}
+{% endblock %}

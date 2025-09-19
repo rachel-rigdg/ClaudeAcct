@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Import OFX File</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Upload Bank Statement</h5>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="ofx_file" class="form-label">OFX File</label>
+                        <input type="file" class="form-control" id="ofx_file" name="ofx_file" 
+                               accept=".ofx,.qfx" required>
+                        <div class="form-text">Select an OFX or QFX file from your bank.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cash_account" class="form-label">Cash Account</label>
+                        <select class="form-select" id="cash_account" name="cash_account" required>
+                            <option value="">Select account...</option>
+                            {% for account in cash_accounts %}
+                                <option value="{{ account[0] }}">{{ account[0] }} - {{ account[1] }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Choose which cash account these transactions belong to.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Import Transactions</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Import Instructions</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-info-circle text-info"></i> Download OFX files from your bank's website</li>
+                    <li><i class="fas fa-info-circle text-info"></i> Files should have .ofx or .qfx extension</li>
+                    <li><i class="fas fa-info-circle text-info"></i> Duplicate transactions are automatically skipped</li>
+                    <li><i class="fas fa-info-circle text-info"></i> Imported transactions may need manual categorization</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

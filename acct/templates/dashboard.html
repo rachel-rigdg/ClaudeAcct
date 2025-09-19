@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>Cash Balance</h5>
+                <h3 class="text-success">{{ cash_balance | currency }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>Revenue</h5>
+                <h3 class="text-primary">{{ revenue_balance | currency }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>Expenses</h5>
+                <h3 class="text-danger">{{ expense_balance | currency }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4">Recent Transactions</h3>
+{% if recent_transactions %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in recent_transactions %}
+            <tr>
+                <td>{{ transaction[0] }}</td>
+                <td>{{ transaction[1] }}</td>
+                <td>{{ transaction[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No transactions found.</p>
+{% endif %}
+{% endblock %}
